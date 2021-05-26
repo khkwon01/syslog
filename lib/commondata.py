@@ -3,6 +3,7 @@
 import  redis
 from lib.commonutil import convert_to_epoch
 
+
 class RedisData(object):
     """A redis based persistance to store and fetch data"""
 
