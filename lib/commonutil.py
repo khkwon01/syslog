@@ -7,9 +7,11 @@ import sys
 import threading
 import time
 import traceback
-#import pprint
-#import uuid
-#import json
+import yaml
+
+# import pprint
+# import uuid
+# import json
 
 
 def convert_to_epoch(v_timestamp):
@@ -20,7 +22,6 @@ def convert_to_epoch(v_timestamp):
     return o_seconds
 
 class CustomThread(threading.Thread):
-
     def __init__(self, v_sleeptime):
         threading.Thread.__init__(self)
         self.__Stop = threading.Event()
@@ -31,10 +32,13 @@ class CustomThread(threading.Thread):
 
     def run(self):
 
-        while not self.__Stop.is_set() :
+        while not self.__Stop.is_set():
 
             try:
+                i_stime = time.time()
                 print('test...')
+                i_est_time = round(time.time() - i_stime, 2)
+                print('time gap: ', i_est_time)
                 time.sleep(self.__Sleep)
             except Exception as e:
                 _, _, o_tb = sys.exc_info()
@@ -53,8 +57,8 @@ class DaemonApp:
         self.__b_Quiet = v_quiet
         self.__s_Homedir = v_homedir
 
-    def run(self):
 
+    def run(self):
         '''
             o_th = CustomThread(10)
             self.__o_Threads.append(o_th)
@@ -76,13 +80,14 @@ class DaemonApp:
 
     def signal(self, v_signum, v_frame):
         self.print_msg("Daemon is stopping...")
+        self.print_msg('Arriaved signal :' + v_signum)
         self.__b_Stop = True
         self.print_msg("Daemon stopped")
 
     def check_threads(self):
 
         for o_th in self.__o_Threads:
-            if o_th.isAlive() != True :
+            if o_th.isAlive() != True:
                 o_th.join(10)
 
     def print_msg(self, v_msg):

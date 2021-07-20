@@ -43,3 +43,5 @@ def authorized_user(v_userid, v_passwd):
         b_retval = True
 
     return b_retval
+
+

@@ -10,3 +10,9 @@ create table service_password (
 
 create inex idx_service_pass_01 on service_password(service, userid);
 
+create table express_resp(
+     id       integer primary key     autoincrement       not null,
+     server   text  not null,
+     pingtime real,
+     exetime  date  default(datetime('now', 'localtime'))
+);
