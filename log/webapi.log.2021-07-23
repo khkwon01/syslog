@@ -1,0 +1,61 @@
+[2021-07-23 21:43:57,078 C:/Users/1000097/Downloads/python/syslog/webapi.py 61] : INFO webapi web service start...
+[2021-07-23 21:48:58,661 C:/Users/1000097/Downloads/python/syslog/webapi.py 61] : INFO webapi web service start...
+[2021-07-23 21:49:01,144 C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py 1891] : ERROR Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\Users\1000097\Downloads\python\syslog\lib\web\base.py", line 24, in index
+    return render_template('index.html')
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\templating.py", line 137, in render_template
+    return _render(
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\templating.py", line 120, in _render
+    rv = template.render(context)
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\jinja2\environment.py", line 1090, in render
+    self.environment.handle_exception()
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\jinja2\environment.py", line 832, in handle_exception
+    reraise(*rewrite_traceback_stack(source=source))
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\jinja2\_compat.py", line 28, in reraise
+    raise value.with_traceback(tb)
+  File "C:\Users\1000097\Downloads\python\syslog\templates\index.html", line 1, in top-level template code
+    {% extends "layout.html" %}
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\jinja2\environment.py", line 832, in handle_exception
+    reraise(*rewrite_traceback_stack(source=source))
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\jinja2\_compat.py", line 28, in reraise
+    raise value.with_traceback(tb)
+  File "C:\Users\1000097\Downloads\python\syslog\templates\layout.html", line 6, in template
+    <% block head %} {% endblock %}
+jinja2.exceptions.TemplateSyntaxError: Encountered unknown tag 'endblock'.
+[2021-07-23 21:50:24,621 C:/Users/1000097/Downloads/python/syslog/webapi.py 61] : INFO webapi web service start...
+[2021-07-23 21:51:11,597 C:/Users/1000097/Downloads/python/syslog/webapi.py 66] : ERROR Err :View function mapping is overwriting an existing endpoint function: base.index
+Traceback (most recent call last):
+  File "C:/Users/1000097/Downloads/python/syslog/webapi.py", line 59, in __init__
+    self.__o_ApiServer.register_blueprint(base)
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 98, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1168, in register_blueprint
+    blueprint.register(self, options, first_registration)
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\blueprints.py", line 256, in register
+    deferred(state)
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\blueprints.py", line 294, in <lambda>
+    self.record(lambda s: s.add_url_rule(rule, endpoint, view_func, **options))
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\blueprints.py", line 81, in add_url_rule
+    self.app.add_url_rule(
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 98, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "C:\Users\1000097\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1282, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: base.index
+
+[2021-07-23 21:51:54,838 C:/Users/1000097/Downloads/python/syslog/webapi.py 61] : INFO webapi web service start...
+[2021-07-23 21:53:01,238 C:/Users/1000097/Downloads/python/syslog/webapi.py 61] : INFO webapi web service start...
+[2021-07-23 21:55:06,948 C:/Users/1000097/Downloads/python/syslog/webapi.py 61] : INFO webapi web service start...

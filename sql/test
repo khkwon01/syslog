@@ -1,0 +1,303 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "db_server_name": {
+            "defaultValue": "qa-story-test-db01",
+            "type": "String"
+        },
+        "oper_env": {
+            "defaultValue": "qa",
+            "type": "String",
+            "metadata": {
+               "description": "operation environment (dev, qa, prod)"
+            }
+        },
+        "administratorLogin": {
+           "type": "string",
+           "defaultValue": "dbadmin",
+           "minLength": 1,
+           "metadata": {
+               "description": "Database administrator login name"
+           }
+        },
+        "administratorLoginPassword": {
+          "type": "securestring",
+          "minLength": 8,
+          "metadata": {
+            "description": "Database administrator password"
+          }
+        },
+        "skuCapacity": {
+          "type": "int",
+          "defaultValue": 4,
+          "metadata": {
+            "description": "Azure database for MySQL compute capacity in vCores (2,4,8,16,32)"
+          }
+        },
+        "skuName": {
+          "type": "string",
+          "defaultValue": "GP_Gen5_4",
+          "metadata": {
+            "description": "Azure database for MySQL sku name ([GP|MO]_Gen5_2, [GP|MO]_Gen5_4, [GP|MO]_Gen5_8...) "
+          }
+        },
+        "SkuSizeMB": {
+          "type": "int",
+          "defaultValue": 524288,
+          "metadata": {
+            "description": "Azure database Storage Size for MySQL Sku Size "
+          }
+        },
+        "SkuTier": {
+          "type": "string",
+          "defaultValue": "GeneralPurpose",
+          "metadata": {
+            "description": "Azure database for MySQL pricing tier (GeneralPurpose, MemoryOptimized)"
+          }
+        },
+        "skuFamily": {
+          "type": "string",
+          "defaultValue": "Gen5",
+          "metadata": {
+            "description": "Azure database for MySQL sku family"
+          }
+        },
+        "mysqlVersion": {
+          "type": "string",
+          "defaultValue": "8.0",
+          "allowedValues": [
+            "5.6",
+            "5.7",
+            "8.0"
+          ],
+          "metadata": {
+            "description": "MySQL version"
+          }
+        },
+        "backupRetentionDays": {
+          "type": "int",
+          "defaultValue": 7,
+          "metadata": {
+            "description": "MySQL Server backup retention days"
+          }
+        },
+        "virtualNetworkName": {
+          "type": "string",
+          "defaultValue": "qa-vnet",
+          "metadata": {
+            "description": "Virtual Network Name"
+          }
+        },
+        "subnetName": {
+          "type": "string",
+          "defaultValue": "qa-svnet-db",
+          "metadata": {
+            "description": "Subnet Name"
+          }
+        },
+        "vnetAddressPrefix": {
+          "type": "string",
+          "defaultValue": "10.22.0.0/16",
+          "metadata": {
+            "description": "Virtual Network Address Prefix"
+          }
+        },
+        "subnetPrefix": {
+          "type": "string",
+          "defaultValue": "10.22.0.0/18",
+          "metadata": {
+            "description": "Subnet Address Prefix"
+          }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+          "type": "Microsoft.Network/virtualNetworks",
+          "apiVersion": "2020-06-01",
+          "name": "[parameters('virtualNetworkName')]",
+          "location": "[resourceGroup().location]",
+          "properties": {
+            "addressSpace": {
+              "addressPrefixes": [
+                "[parameters('vnetAddressPrefix')]"
+              ]
+            }
+          },
+          "resources": [
+            {
+              "type": "subnets",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('subnetName')]",
+              "location": "[resourceGroup().location]",
+              "dependsOn": [
+                "[parameters('virtualNetworkName')]"
+              ],
+              "properties": {
+                "addressPrefix": "[parameters('subnetPrefix')]"
+              }
+            }
+          ]
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers",
+            "apiVersion": "2017-12-01",
+            "name": "[parameters('db_server_name')]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "env": "[parameters('oper_env')]",
+                "name": "[parameters('db_server_name')]",
+                "rg": "[resourceGroup().name]"
+            },
+            "sku": {
+                "name": "[parameters('skuName')]",
+                "tier": "[parameters('skuTier')]",
+                "family": "[parameters('skuFamily')]",
+                "capacity": "[parameters('skuCapacity')]"
+            },
+            "properties": {
+                "storageProfile": {
+                    "storageMB": "[parameters('skuSizeMB')]",
+                    "backupRetentionDays": "[parameters('backupRetentionDays')]",
+                    "geoRedundantBackup": "Disabled",
+                    "storageAutogrow": "Enabled"
+                },
+                "version": "[parameters('mysqlVersion')]",
+                "administratorLogin": "[parameters('administratorLogin')]",
+                "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
+                "sslEnforcement": "Disabled",
+                "minimalTlsVersion": "TLSEnforcementDisabled",
+                "infrastructureEncryption": "Disabled",
+                "publicNetworkAccess": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('db_server_name'), '/character_set_server')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('db_server_name'))]"
+            ],
+            "properties": {
+                "value": "UTF8MB4",
+                "source": "user-override"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('db_server_name'), '/collation_server')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('db_server_name'))]"
+            ],
+            "properties": {
+                "value": "UTF8MB4_BIN",
+                "source": "user-override"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('db_server_name'), '/innodb_adaptive_hash_index')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('db_server_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "user-override"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('db_server_name'), '/local_infile')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('db_server_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "user-override"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('db_server_name'), '/long_query_time')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('db_server_name'))]"
+            ],
+            "properties": {
+                "value": "1",
+                "source": "user-override"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('db_server_name'), '/max_connections')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('db_server_name'))]"
+            ],
+            "properties": {
+                "value": "1250",
+                "source": "user-override"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('db_server_name'), '/slow_query_log')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('db_server_name'))]"
+            ],
+            "properties": {
+                "value": "ON",
+                "source": "user-override"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('db_server_name'), '/time_zone')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('db_server_name'))]"
+            ],
+            "properties": {
+                "value": "+09:00",
+                "source": "user-override"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('db_server_name'), '/transaction_isolation')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('db_server_name'))]"
+            ],
+            "properties": {
+                "value": "READ-COMMITTED",
+                "source": "user-override"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/securityAlertPolicies",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('db_server_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('db_server_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled",
+                "disabledAlerts": [
+                    ""
+                ],
+                "emailAddresses": [
+                    ""
+                ],
+                "emailAccountAdmins": false,
+                "retentionDays": 0
+            }
+        }
+    ]
+}
