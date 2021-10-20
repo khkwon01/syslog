@@ -7,8 +7,7 @@ import re
 import ldap
 
 import base64
-from Crypto.Cipher import AES
-from Crypto import Random
+from cryptography.fernet import Fernet
 
 import lib.commonhttpcode as httpcode
 from lib.commonexcept import UserDefExcept
@@ -18,55 +17,43 @@ from lib.commonlog import Log
 '''
     class : AESCipher
     description : encrypt or decrypt message using AES algorithm
+    refer url : https://cryptography.io/
 '''
-
 class AESCipher(object):
     def __init__(self, v_key=None):
         self.s_key = v_key
         self.i_bs = 32
 
-        if self.s_key is None :
-            raise UserDefExcept("It must define key")
+        if self.s_key is None:
+            self.s_key = Fernet.generate_key()
+            print(f'key : { self.s_key }')
 
-        if len(self.s_key) % 16 != 0 :
-            raise UserDefExcept("AES key size must be either 16, 24, or 32 bytes")
+        self.o_crypto = Fernet(self.s_key)
 
     def encrypt(self, v_raw_message=None):
 
         if v_raw_message is None:
             raise UserDefExcept("It must provide message")
 
-        s_pad_message = self._pad(v_raw_message)
-        s_iv = Random.new().read(AES.block_size)
-        o_cipher = AES.new(self.s_key, AES.MODE_CBC, s_iv)
+        s_enc_message = self.o_crypto.encrypt(v_raw_message.encode("utf8"))
 
-        return base64.b64encode(s_iv + o_cipher.encrypt(s_pad_message))
+        return base64.b64encode(s_enc_message)
+
 
     def decrypt(self, v_enc_message=None):
         if v_enc_message is None:
             raise UserDefExcept("It must provide encrypted message")
 
-        s_enc_message = base64.b64decode(v_enc_message)
-        s_iv = s_enc_message[:AES.block_size]
-        o_cipher = AES.new(self.s_key, AES.MODE_CBC, s_iv)
+        s_dec_message = base64.b64decode(v_enc_message)
+        s_dec_message = self.o_crypto.decrypt(s_dec_message)
 
-        return self._unpad(o_cipher.decypt(s_enc_message[AES.block_size:])).decode('utf-8')
-
-    def _pad(self, v_block_text):
-        return v_block_text + (self.i_bs - len(v_block_text) % self.i_bs) * \
-                chr(self.i_bs - len(v_block_text) % self.i_bs)
-
-    def _unpad(self, v_block_text):
-        return v_block_text[:-ord(v_block_text[len(v_block_text)-1:])]
-
+        return s_dec_message
 
 
 '''
     class : Authldap
     descritpion : authenticate ldap user
 '''
-
-
 class Authldap:
     def __init__(self, v_logger, v_ldapurl, v_ldapbase=None, v_referrals=0, v_protocol_ver=ldap.VERSION3):
         self.o_logger = v_logger
@@ -113,3 +100,13 @@ class Authldap:
                 self.o_ldapsess.ubind_s()
 
         return o_result
+
+
+if __name__ == '__main__':
+    o_auth = AESCipher('gl1rdnaieUBMI6B1ypTmSgPLWcr3CJgvmIPmM4hy86k=')
+
+    s_enctext = o_auth.encrypt("무엇을 해야할지 생각 좀 해 봐야겠어요. 갈데가 없네요.")
+    print(s_enctext)
+
+    s_dectext = o_auth.decrypt(s_enctext)
+    print(s_dectext.decode('utf8'))

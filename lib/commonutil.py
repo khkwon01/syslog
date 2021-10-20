@@ -7,19 +7,33 @@ import sys
 import threading
 import time
 import traceback
+import paramiko
+import subprocess  # local 서버 명령어 수행
 import yaml
+
 
 # import pprint
 # import uuid
 # import json
 
 
+def ssh_test():
+    o_client = paramiko.SSHClient()
+    o_client.connect('127.0.0.1', username='test', password='test00')
+    o_stdin, o_stdout, o_stderr = o_client.exec_command('dir')
+
+    for line in o_stdout:
+        print(line)
+    o_client.close()
+
+
 def convert_to_epoch(v_timestamp):
-    o_timestamp = v_timestamp.replace(tzinfo=None)
+    # o_timestamp = v_timestamp.replace(tzinfo=None)
     o_diff = (v_timestamp - datetime(1970, 1, 1))
     o_seconds = o_diff.total_seconds()
 
     return o_seconds
+
 
 class CustomThread(threading.Thread):
     def __init__(self, v_sleeptime):
@@ -57,7 +71,6 @@ class DaemonApp:
         self.__b_Quiet = v_quiet
         self.__s_Homedir = v_homedir
 
-
     def run(self):
         '''
             o_th = CustomThread(10)
@@ -80,7 +93,7 @@ class DaemonApp:
 
     def signal(self, v_signum, v_frame):
         self.print_msg("Daemon is stopping...")
-        self.print_msg('Arriaved signal :' + v_signum)
+        self.print_msg("Arriaved signal :" + str(v_signum) + "," + v_frame)
         self.__b_Stop = True
         self.print_msg("Daemon stopped")
 
@@ -94,6 +107,7 @@ class DaemonApp:
         s_time = time.strftime("[%Y%m%d %H:%M:%S] ", time.localtime(time.time()))
         print(s_time + " : " + v_msg)
         sys.stdout.flush()
+
 
 if __name__ == '__main__':
     o_parser = argparse.ArgumentParser(description='daemon process...')

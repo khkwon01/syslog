@@ -9,16 +9,38 @@ from flask_httpauth import HTTPBasicAuth
 from flask_ldapconn import LDAPConn
 from ldap3 import SUBTREE
 import lib.commonhttpcode as  http_status
+import lib.commongraph as gp
 
 
 """ register blueprint (define: static_folder,static_url_path,template_folder,url_prefix etc) """
 base = Blueprint('base', __name__, template_folder='templates', static_folder='static')
 
 
+""" main page index"""
+@base.route('/')
+def index():
+    i_code = http_status.HTTP_200_OK
+    s_desc = "/ access is test ok..."
+
+    return render_template('index.html')
+
+@base.route('/chart')
+def chart():
+    i_code = http_status.HTTP_200_OK
+    s_desc = "/ access is test ok..."
+
+    o_chart = gp.TestGraph()
+    o_chart.data.label = "Test graph..."
+
+    o_cjson = o_chart.get()
+
+    return render_template('graph.html', chartJSON=o_cjson)
+
+
 """ defin httpauth object """
 auth = HTTPBasicAuth()
 
-@base.route('/')
+@base.route('/login')
 @auth.login_required
 def login():
     i_code = http_status.HTTP_200_OK
