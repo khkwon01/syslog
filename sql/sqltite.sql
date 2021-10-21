@@ -50,6 +50,9 @@ create table server_new (
      reg_dt       date default(datetime('now', 'localtime')),
      upd_dt       date default(datetime('now', 'localtime'))
 );
+alter table server_n add column mem text default "-";
+alter table server rename to server_orig;
+alter table server_n rename to server;
 
 insert into server (name, ip, env, dbtype, service) values('qa-gasp-admin-db01', '10.22.0.12', 'qa', 'mysql8.0', 'gasp-admin');
 insert into server (name, ip, env, dbtype, service) values('qa-gasp-cert-db01', '10.22.0.10', 'qa', 'mysql8.0', 'gasp-cert');
